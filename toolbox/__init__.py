@@ -109,10 +109,10 @@ class Toolbox:
         self.ui.stop_button.clicked.connect(self.ui.stop)
         self.ui.record_button.clicked.connect(self.record)
 
-        #Audio
+        # Audio
         self.ui.setup_audio_devices(Synthesizer.sample_rate)
 
-        #Wav playback & save
+        # wav playback & save
         func = lambda: self.replay_last_wav()
         self.ui.replay_wav_button.clicked.connect(func)
         func = lambda: self.export_current_wave()
@@ -162,8 +162,8 @@ class Toolbox:
             speaker_name = fpath.parent.name
 
         if fpath.suffix.lower() == ".mp3" and self.no_mp3_support:
-                self.ui.log("Error: No mp3 file argument was passed but an mp3 file was used")
-                return
+            self.ui.log("Error: No mp3 file argument was passed but an mp3 file was used")
+            return
 
         # Get the wav from the disk. We take the wav with the vocoder/synthesizer format for
         # playback, so as to have a fair comparison with the generated audio
@@ -298,8 +298,8 @@ class Toolbox:
         #Update waves combobox
         self.waves_count += 1
         if self.waves_count > MAX_WAVES:
-          self.waves_list.pop()
-          self.waves_namelist.pop()
+            self.waves_list.pop()
+            self.waves_namelist.pop()
         self.waves_list.insert(0, wav)
         self.waves_namelist.insert(0, wav_name)
 
@@ -352,15 +352,13 @@ class Toolbox:
         self.ui.set_loading(0)
            
     def init_vocoder(self):
-
         global vocoder
         model_fpath = self.ui.current_vocoder_fpath
         # Case of Griffin-lim
         if model_fpath is None:
             return 
         
-
-        # Sekect vocoder based on model name
+        # Select vocoder based on model name
         if model_fpath.name[0] == "g":
             vocoder = gan_vocoder
             self.ui.log("set hifigan as vocoder")

@@ -52,7 +52,7 @@ class UI(QDialog):
     
     def draw_embed(self, embed, name, which):
         embed_ax, _ = self.current_ax if which == "current" else self.gen_ax
-        embed_ax.figure.suptitle("" if embed is None else name)
+        #embed_ax.figure.suptitle("" if embed is None else name)
         
         ## Embedding
         # Clear the plot
@@ -138,7 +138,7 @@ class UI(QDialog):
             filter="Audio Files (*.flac *.wav)"
         )
         if fpath:
-            #Default format is wav
+            # Default format is wav
             if Path(fpath).suffix == "":
                 fpath += ".wav"
             sf.write(fpath, wav, sample_rate)
@@ -181,7 +181,6 @@ class UI(QDialog):
         self.set_audio_device()
 
     def set_audio_device(self):
-        
         output_device = self.audio_out_devices_cb.currentText()
         if output_device == "None":
             output_device = None
@@ -363,6 +362,8 @@ class UI(QDialog):
         self.synthesize_button.setDisabled(False)
 
     def log(self, line, mode="newline"):
+        if not line.strip():
+            return
         if mode == "newline":
             self.logs.append(line)
             if len(self.logs) > self.max_log_lines:
@@ -434,23 +435,30 @@ class UI(QDialog):
         
         # Browser
         browser_layout = QGridLayout()
-        root_layout.addLayout(browser_layout, 0, 0, 1, 8)
-        
-        # Generation
-        gen_layout = QVBoxLayout()
-        root_layout.addLayout(gen_layout, 0, 8)
-
-        # Visualizations
-        vis_layout = QVBoxLayout()
-        root_layout.addLayout(vis_layout, 1, 0, 2, 8)
+        root_layout.addLayout(browser_layout, 0, 0)
 
         # Output
         output_layout = QGridLayout()
-        vis_layout.addLayout(output_layout, 0)
+        root_layout.addLayout(output_layout, 1, 0)
+
+        # Visualizations
+        vis_layout = QVBoxLayout()
+        root_layout.addLayout(vis_layout, 2, 0)
+
+        # Generation
+        gen_layout = QVBoxLayout()
+        root_layout.addLayout(gen_layout, 0, 1)
+
+        # Log output
+        self.log_window = QTextEdit()
+        self.log_window.setAlignment(Qt.AlignBottom | Qt.AlignLeft)
+        self.log_window.setReadOnly(True)
+        root_layout.addWidget(self.log_window, 1, 1)
+        self.logs = []
 
         # Projections
         self.projections_layout = QVBoxLayout()
-        root_layout.addLayout(self.projections_layout, 1, 8, 2, 2)
+        root_layout.addLayout(self.projections_layout, 2, 1)
         
         ## Projections
         # UMap
@@ -466,70 +474,76 @@ class UI(QDialog):
         # Dataset, speaker and utterance selection
         i = 0
         
-        source_groupbox = QGroupBox('Source(源音频)')
+        source_groupbox = QGroupBox('Source (源音频)')
         source_layout = QGridLayout()
         source_groupbox.setLayout(source_layout)
         browser_layout.addWidget(source_groupbox, i, 0, 1, 4)
 
         self.dataset_box = QComboBox()
-        source_layout.addWidget(QLabel("Dataset(数据集):"), i, 0)
-        source_layout.addWidget(self.dataset_box, i, 1)
+        source_layout.addWidget(QLabel("Dataset (数据集):"), i, 0)
+        source_layout.addWidget(self.dataset_box, i, 1, 1, 2)
         self.random_dataset_button = QPushButton("Random")
-        source_layout.addWidget(self.random_dataset_button, i, 2)
+        source_layout.addWidget(self.random_dataset_button, i, 3)
         i += 1
         self.speaker_box = QComboBox()
-        source_layout.addWidget(QLabel("Speaker(说话者)"), i, 0)
-        source_layout.addWidget(self.speaker_box, i, 1)
+        source_layout.addWidget(QLabel("Speaker (说话者)"), i, 0)
+        source_layout.addWidget(self.speaker_box, i, 1, 1, 2)
         self.random_speaker_button = QPushButton("Random")
-        source_layout.addWidget(self.random_speaker_button, i, 2)
+        source_layout.addWidget(self.random_speaker_button, i, 3)
         i += 1
         self.utterance_box = QComboBox()
-        source_layout.addWidget(QLabel("Utterance(音频):"), i, 0)
-        source_layout.addWidget(self.utterance_box, i, 1)
+        source_layout.addWidget(QLabel("Utterance (音频):"), i, 0)
+        source_layout.addWidget(self.utterance_box, i, 1, 1, 2)
         self.random_utterance_button = QPushButton("Random")
-        source_layout.addWidget(self.random_utterance_button, i, 2)
+        source_layout.addWidget(self.random_utterance_button, i, 3)
 
         i += 1
-        source_layout.addWidget(QLabel("<b>Use(使用):</b>"), i, 0)
-        self.browser_load_button = QPushButton("Load Above(加载上面)")
-        source_layout.addWidget(self.browser_load_button, i, 1, 1, 2)
+        source_layout.addWidget(QLabel("<b>Use (使用):</b>"), i, 0)
+        self.browser_load_button = QPushButton("Load Above (加载上面)")
+        source_layout.addWidget(self.browser_load_button, i, 1)
+        self.browser_browse_button = QPushButton("Browse (打开本地)")
+        source_layout.addWidget(self.browser_browse_button, i, 2)
+        self.record_button = QPushButton("Record (录音)")
+        source_layout.addWidget(self.record_button, i, 3)
+        i += 1
         self.auto_next_checkbox = QCheckBox("Auto select next")
         self.auto_next_checkbox.setChecked(True)
-        source_layout.addWidget(self.auto_next_checkbox, i+1, 1)
-        self.browser_browse_button = QPushButton("Browse(打开本地)")
-        source_layout.addWidget(self.browser_browse_button, i, 3)
-        self.record_button = QPushButton("Record(录音)")
-        source_layout.addWidget(self.record_button, i+1, 3)
-        
-        i += 2
-        # Utterance box
-        browser_layout.addWidget(QLabel("<b>Current(当前):</b>"), i, 0)
-        self.utterance_history = QComboBox()
-        browser_layout.addWidget(self.utterance_history, i, 1)
-        self.play_button = QPushButton("Play(播放)")
-        browser_layout.addWidget(self.play_button, i, 2)
-        self.stop_button = QPushButton("Stop(暂停)")
-        browser_layout.addWidget(self.stop_button, i, 3)
-
+        source_layout.addWidget(self.auto_next_checkbox, i, 1)
         i += 1
-        model_groupbox = QGroupBox('Models(模型选择)')
+        # Utterance box
+        source_layout.addWidget(QLabel("<b>Current (当前):</b>"), i, 0)
+        self.utterance_history = QComboBox()
+        source_layout.addWidget(self.utterance_history, i, 1)
+        self.play_button = QPushButton("Play (播放)")
+        source_layout.addWidget(self.play_button, i, 2)
+        self.stop_button = QPushButton("Stop (暂停)")
+        source_layout.addWidget(self.stop_button, i, 3)
+
+
+        model_groupbox = QGroupBox('Models (模型选择)')
         model_layout = QHBoxLayout()
         model_groupbox.setLayout(model_layout)
         browser_layout.addWidget(model_groupbox, i, 0, 1, 4)
 
         # Model and audio output selection
+        label = QLabel("Encoder:")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        model_layout.addWidget(label)
         self.encoder_box = QComboBox()
-        model_layout.addWidget(QLabel("Encoder:"))
         model_layout.addWidget(self.encoder_box)
+        label = QLabel("Synthesizer:")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        model_layout.addWidget(label)
         self.synthesizer_box = QComboBox()
-        model_layout.addWidget(QLabel("Synthesizer:"))
         model_layout.addWidget(self.synthesizer_box)
+        label = QLabel("Vocoder:")
+        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        model_layout.addWidget(label)
         self.vocoder_box = QComboBox()
-        model_layout.addWidget(QLabel("Vocoder:"))
         model_layout.addWidget(self.vocoder_box)
         
 
-        #Replay & Save Audio
+        # Replay & Save Audio
         i = 0
         output_layout.addWidget(QLabel("<b>Toolbox Output:</b>"), i, 0)
         self.waves_cb = QComboBox()
@@ -545,7 +559,7 @@ class UI(QDialog):
         output_layout.addWidget(self.export_wav_button, i, 3)
         self.audio_out_devices_cb=QComboBox()
         i += 1
-        output_layout.addWidget(QLabel("<b>Audio Output</b>"), i, 0)
+        output_layout.addWidget(QLabel("<b>Audio Output:</b>"), i, 0)
         output_layout.addWidget(self.audio_out_devices_cb, i, 1)
 
         ## Embed & spectrograms
@@ -554,12 +568,12 @@ class UI(QDialog):
         gridspec_kw = {"width_ratios": [1, 4]}
         fig, self.current_ax = plt.subplots(1, 2, figsize=(10, 2.25), facecolor="#F0F0F0", 
                                             gridspec_kw=gridspec_kw)
-        fig.subplots_adjust(left=0, bottom=0.1, right=1, top=0.8)
+        fig.subplots_adjust(left=0.05, right=0.95, top=0.8)
         vis_layout.addWidget(FigureCanvas(fig))
 
         fig, self.gen_ax = plt.subplots(1, 2, figsize=(10, 2.25), facecolor="#F0F0F0", 
                                         gridspec_kw=gridspec_kw)
-        fig.subplots_adjust(left=0, bottom=0.1, right=1, top=0.8)
+        fig.subplots_adjust(left=0.05, right=0.95, top=0.8)
         vis_layout.addWidget(FigureCanvas(fig))
 
         for ax in self.current_ax.tolist() + self.gen_ax.tolist():
@@ -574,12 +588,12 @@ class UI(QDialog):
         self.generate_button = QPushButton("Synthesize and vocode")
         gen_layout.addWidget(self.generate_button)
         
-        layout = QHBoxLayout()
+        buttons_layout = QHBoxLayout()
         self.synthesize_button = QPushButton("Synthesize only")
-        layout.addWidget(self.synthesize_button)
+        buttons_layout.addWidget(self.synthesize_button)
         self.vocode_button = QPushButton("Vocode only")
-        layout.addWidget(self.vocode_button)
-        gen_layout.addLayout(layout)
+        buttons_layout.addWidget(self.vocode_button)
+        gen_layout.addLayout(buttons_layout)
 
         layout_seed = QGridLayout()
         self.random_seed_checkbox = QCheckBox("Random seed:")
@@ -612,7 +626,7 @@ class UI(QDialog):
         self.token_slider.setRange(3, 9)
         self.token_value_label = QLabel("5")
         self.token_slider.setValue(4)
-        layout_seed.addWidget(QLabel("Accuracy(精度):"), 2, 0)
+        layout_seed.addWidget(QLabel("Accuracy (精度):"), 2, 0)
 
         self.token_slider.valueChanged.connect(lambda s: self.token_value_label.setNum(s))
         layout_seed.addWidget(self.token_value_label, 2, 1)
@@ -625,21 +639,17 @@ class UI(QDialog):
         self.length_slider.setRange(1, 10)
         self.length_value_label = QLabel("2")
         self.length_slider.setValue(2)
-        layout_seed.addWidget(QLabel("MaxLength(最大句长):"), 3, 0)
+        layout_seed.addWidget(QLabel("Max Length (最大句长):"), 3, 0)
 
         self.length_slider.valueChanged.connect(lambda s: self.length_value_label.setNum(s))
         layout_seed.addWidget(self.length_value_label, 3, 1)
         layout_seed.addWidget(self.length_slider, 3, 3)
 
-        gen_layout.addLayout(layout_seed)
-
+        layout_seed.addWidget(QLabel("Progress (进度):"), 4, 0)
         self.loading_bar = QProgressBar()
-        gen_layout.addWidget(self.loading_bar)
-        
-        self.log_window = QLabel()
-        self.log_window.setAlignment(Qt.AlignBottom | Qt.AlignLeft)
-        gen_layout.addWidget(self.log_window)
-        self.logs = []
+        layout_seed.addWidget(self.loading_bar, 4, 1, 1, 3)
+
+        gen_layout.addLayout(layout_seed)
         gen_layout.addStretch()
 
         
