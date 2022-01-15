@@ -62,7 +62,7 @@ def run_synthesis(in_dir, out_dir, model_dir, hparams):
     num_workers = 0 if sys.platform.startswith("win") else 2;
     dataset = SynthesizerDataset(metadata_fpath, mel_dir, embed_dir, hparams)
     data_loader = DataLoader(dataset,
-                             collate_fn=lambda batch: collate_synthesizer(batch),
+                             collate_fn=collate_synthesizer,
                              batch_size=hparams.synthesis_batch_size,
                              num_workers=num_workers,
                              shuffle=False,
