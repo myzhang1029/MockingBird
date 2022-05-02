@@ -565,12 +565,6 @@ class UI(QDialog):
         label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         model_layout.addWidget(label)
         self.synthesizer_box = QComboBox()
-<<<<<<< HEAD
-        model_layout.addWidget(self.synthesizer_box)
-        label = QLabel("Vocoder:")
-        label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        model_layout.addWidget(label)
-=======
         if vc_mode:
             self.extractor_box = QComboBox()
             model_layout.addWidget(QLabel("Extractor:"))
@@ -581,17 +575,10 @@ class UI(QDialog):
         else:
             model_layout.addWidget(QLabel("Synthesizer:"))
             model_layout.addWidget(self.synthesizer_box)
->>>>>>> f082a8242031dbaf16ed392d875a73897d58f87a
         self.vocoder_box = QComboBox()
         model_layout.addWidget(self.vocoder_box)
-<<<<<<< HEAD
-        
 
         # Replay & Save Audio
-=======
-    
-        #Replay & Save Audio
->>>>>>> f082a8242031dbaf16ed392d875a73897d58f87a
         i = 0
         output_layout.addWidget(QLabel("<b>Toolbox Output:</b>"), i, 0)
         self.waves_cb = QComboBox()
@@ -633,29 +620,18 @@ class UI(QDialog):
         self.text_prompt = QPlainTextEdit(default_text)
         gen_layout.addWidget(self.text_prompt, stretch=1)
         
-<<<<<<< HEAD
-        self.generate_button = QPushButton("Synthesize and vocode")
-        gen_layout.addWidget(self.generate_button)
-        
-        buttons_layout = QHBoxLayout()
-        self.synthesize_button = QPushButton("Synthesize only")
-        buttons_layout.addWidget(self.synthesize_button)
-=======
         if vc_mode:
-            layout = QHBoxLayout()
+            buttons_layout = QHBoxLayout()
             self.convert_button = QPushButton("Extract and Convert")
-            layout.addWidget(self.convert_button)
-            gen_layout.addLayout(layout)
+            buttons_layout.addWidget(self.convert_button)
         else:
             self.generate_button = QPushButton("Synthesize and vocode")
             gen_layout.addWidget(self.generate_button)
-            layout = QHBoxLayout()
+            buttons_layout = QHBoxLayout()
             self.synthesize_button = QPushButton("Synthesize only")
-            layout.addWidget(self.synthesize_button)
-
->>>>>>> f082a8242031dbaf16ed392d875a73897d58f87a
-        self.vocode_button = QPushButton("Vocode only")
-        buttons_layout.addWidget(self.vocode_button)
+            buttons_layout.addWidget(self.synthesize_button)
+            self.vocode_button = QPushButton("Vocode only")
+            buttons_layout.addWidget(self.vocode_button)
         gen_layout.addLayout(buttons_layout)
 
 
