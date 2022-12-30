@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from pydantic import BaseModel, Field
 import os
 from pathlib import Path
@@ -11,16 +10,18 @@ import numpy as np
 from mkgui.base.components.types import FileContent
 from vocoder.hifigan import inference as gan_vocoder
 from synthesizer.inference import Synthesizer
-from typing import Any
+from typing import Any, Tuple
 import matplotlib.pyplot as plt
 
 # Constants
-AUDIO_SAMPLES_DIR = 'samples\\'
-SYN_MODELS_DIRT = "synthesizer\\saved_models"
-ENC_MODELS_DIRT = "encoder\\saved_models"
-VOC_MODELS_DIRT = "vocoder\\saved_models"
-TEMP_SOURCE_AUDIO = "wavs\\temp_source.wav"
-TEMP_RESULT_AUDIO = "wavs\\temp_result.wav"
+AUDIO_SAMPLES_DIR = f"samples{os.sep}"
+SYN_MODELS_DIRT = f"synthesizer{os.sep}saved_models"
+ENC_MODELS_DIRT = f"encoder{os.sep}saved_models"
+VOC_MODELS_DIRT = f"vocoder{os.sep}saved_models"
+TEMP_SOURCE_AUDIO = f"wavs{os.sep}temp_source.wav"
+TEMP_RESULT_AUDIO = f"wavs{os.sep}temp_result.wav"
+if not os.path.isdir("wavs"):
+    os.makedirs("wavs")
 
 # Load local sample audio as options TODO: load dataset 
 if os.path.isdir(AUDIO_SAMPLES_DIR):
@@ -43,6 +44,7 @@ if os.path.isdir(VOC_MODELS_DIRT):
     print("Loaded vocoders models: " + str(len(synthesizers)))
 else:
     raise Exception(f"Model folder {VOC_MODELS_DIRT} doesn't exist.")
+
 
 
 class Input(BaseModel):
@@ -73,7 +75,7 @@ class AudioEntity(BaseModel):
     mel: Any
 
 class Output(BaseModel):
-    __root__: tuple[AudioEntity, AudioEntity]
+    __root__: Tuple[AudioEntity, AudioEntity]
 
     def render_output_ui(self, streamlit_app, input) -> None:  # type: ignore
         """Custom output UI.
